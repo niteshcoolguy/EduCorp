@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Info</title>
+    <style>
+        body {
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+        }
+        .student-box {
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 35px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 25%;
+        }
+        .student-box h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .student-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .student-box table th, .student-box table td {
+            text-align: left;
+            padding: 8px;
+            color: black;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .icon {
+            margin-right: 10px;
+            color: orange;
+            padding-right: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="student-box">
+        <h2>{{ student_instance.username }} {{ student_instance.surname }}</h2>
+        <table>
+            <tr>
+                <td><i class="fa fa-envelope icon"></i>{{ student_instance.email }}</td>
+            </tr>
+            <tr>
+                <td><i class="fa fa-phone icon"></i>{{ student_instance.phone_number }}</td>
+            </tr>
+            <tr>
+                <td><i class="fa fa-book icon"></i>{{ student_instance.student_course.course_name }}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

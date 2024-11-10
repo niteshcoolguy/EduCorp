@@ -1,0 +1,95 @@
+{% extends 'login_registration/base.html' %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags %}
+            <script>alert("{{ message }}")</script>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<style>
+  body {
+    width: 100%;
+    height: 100%;
+    
+    justify-content: center;
+  }
+
+  .btn-lg {
+    font-size: 1.25rem;
+  }
+
+  .btn-primary {
+    margin: 0px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+    border-color: red;
+  }
+
+  .card-signin {
+    background-color: aqua;
+    margin-top: 10%;
+  }
+
+  .card-body {
+    background-image: linear-gradient(to right, skyblue, rgba(71, 232, 50, 0.578));
+  }
+
+  .form-signin {
+    max-width: 400px;
+    margin: auto;
+  }
+
+  .form-label-group {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .form-label-group > label {
+    color: white;
+  }
+
+  .form-label-group > input {
+    border-radius: 0.5rem;
+  }
+</style>
+
+<div style="height: 593px;">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card card-signin my-5">
+          <div class="card-body">
+            <h3 class="card-title text-center" style="color: white;">User Register</h3>
+            <form class="form-signin" action="{% url 'register' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-label-group">
+                <label for="Username">Username</label>
+                <input type="text" id="Username" name="Username" class="form-control" placeholder="Username" required autofocus>
+              </div>
+              <br>
+              <div class="form-label-group">
+                <label for="inputEmail">Email address</label>
+                <input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email address" required>
+              </div>
+              <br>
+              <div class="form-label-group">
+                <label for="inputPassword">Password</label>
+                <input type="password" id="inputPassword" class="form-control" name="password" placeholder="Password" required>
+              </div>
+              <br>
+              <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Register</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

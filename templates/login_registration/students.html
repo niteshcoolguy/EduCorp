@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            color: white;
+            justify-content: center;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 60px;
+        }
+        .input-field {
+            margin-bottom: 50px;
+        }
+        .btn {
+            color: white;
+        }
+        table tr {
+            color: white;
+        }
+        .div1 {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    {% if request.session.type_id == 'User' %}
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Course</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'students' %}">Students</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'company' %}">Company</a>
+                    </li>
+                </ul>
+                {% if request.session.login == 'Yes' %}
+                <ul class="nav navbar-nav navbar-right">
+                    <a class="btn btn-success" style="margin-top: 10px;" href="{% url 'logout' %}">Logout</a>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    {% block nav_options %}
+    {% endblock %}
+
+    <div class="container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-{{ message.tags }} alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    {% block content %}
+    <div class="m-3 table-responsive">
+        <h2>Student List</h2>
+        <div class="div1">
+            <form method="GET">
+                <div class="input-field">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Search Here...">
+                    <button class="btn" type="submit" name="action">Search</button>
+                </div>
+            </form>
+            <div class="mb-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createStudentModal">
+                    <i class="fa fa-plus"></i> Add Student
+                </button>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="text-align:center; width:3%" scope="col">#</th>
+                    <th style="text-align:center" scope="col">Student Name</th>
+                    <th style="text-align:center" scope="col">Student Email</th>
+                    <th style="text-align:center" scope="col">Student Contact</th>
+                    <th style="text-align:center" scope="col">Course Name</th>
+                    <th style="text-align:center" scope="col">View Student</th>
+                    <th style="text-align:center; width:8%" scope="col">Date</th>
+                    <th style="text-align:center; width:15%" scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in users %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ student.username }} {{ student.surname }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.phone_number }}</td>
+                    <td>{{ student.student_course.course_name }}</td>
+                    <td style="text-align:center"><a href="{% url 'student_info' student.id %}">Student info</a></td>
+                    <td style="text-align:center">{{ student.created_date|date:"d-m-y" }}</td>
+                    <td style="text-align:center">
+                        <button class="m-1 btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateStudentModal"
+                            data-id="{{ student.id }}" data-username="{{ student.username }}" data-surname="{{ student.surname }}"
+                            data-email="{{ student.email }}" data-phone_number="{{ student.phone_number }}"
+                            data-course_id="{{ student.student_course.id }}"><i class="fa fa-edit"></i></button>
+                        <a name="delete" class="m-1 btn btn-outline-danger btn-sm" href="#" data-url="{% url 'delete_student' student.id %}" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"><i class="fa fa-trash"></i></a>
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if users.has_other_pages %}
+        <ul class="pagination">
+            {% if users.has_previous %}
+            <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+            <li class="disabled"><span>&laquo;</span></li>
+            {% endif %}
+            {% for i in users.paginator.page_range %}
+            {% if users.number == i %}
+            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+            {% else %}
+            <li><a href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if users.has_next %}
+            <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+            {% else %}
+            <li class="disabled"><span>&raquo;</span></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Create Student Modal -->
+    <div class="modal fade" id="createStudentModal" tabindex="-1" aria-labelledby="createStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: grey;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createStudentModalLabel" style="color:white">Create Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createStudentForm" action="{% url 'student_create' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-label-group">
+                            <label for="username" style="color:white">Student Name</label>
+                            <input type="text" id="username" name="username" class="form-control"
+                                placeholder="Enter Student Name" required autofocus>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="surname" style="color:white">Surname</label>
+                            <input type="text" id="surname" name="surname" class="form-control" placeholder="Enter Surname" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="email" style="color:white">Student Email</label>
+                            <input type="email" id="email" class="form-control" name="email"
+                                placeholder="Enter Student Email" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="phone_number" style="color:white">Student Contact</label>
+                            <input type="text" id="phone_number" class="form-control" name="phone_number"
+                                placeholder="Enter Student Contact" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="course" style="color:white">Student Course</label>
+                            <select name="course" id="course" class="form-control" required>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase mt-3" type="submit">Add</button>
+                        <hr class="my-4">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Student Modal -->
+    <div class="modal fade" id="updateStudentModal" tabindex="-1" aria-labelledby="updateStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: grey;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStudentModalLabel" style="color:white">Update Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateStudentForm" method="POST">
+                        {% csrf_token %}
+                        <div class="form-label-group">
+                            <label for="update_username" style="color:white">Student Name</label>
+                            <input type="text" id="update_username" name="username" class="form-control" required autofocus>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="update_surname" style="color:white">Surname</label>
+                            <input type="text" id="update_surname" name="surname" class="form-control" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="update_email" style="color:white">Student Email</label>
+                            <input type="email" id="update_email" class="form-control" name="email" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="update_phone_number" style="color:white">Student Contact</label>
+                            <input type="text" id="update_phone_number" class="form-control" name="phone_number" required>
+                        </div>
+                        <br>
+                        <div class="form-label-group">
+                            <label for="update_course" style="color:white">Student Course</label>
+                            <select name="course" id="update_course" class="form-control" required>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase mt-3" type="submit">Update</button>
+                        <hr class="my-4">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: grey;">
+            <div class="modal-header" style="border-bottom: none;">
+                <h5 class="modal-title" id="deleteConfirmationLabel" style="color:white;">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:white;">
+                Are you sure you want to delete this student?
+            </div>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+        crossorigin="anonymous"></script>
+        <script>
+            const updateStudentModal = document.getElementById('updateStudentModal');
+            updateStudentModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const username = button.getAttribute('data-username');
+                const surname = button.getAttribute('data-surname');
+                const email = button.getAttribute('data-email');
+                const phone_number = button.getAttribute('data-phone_number');
+                const course_id = button.getAttribute('data-course_id');
+        
+                const modalTitle = updateStudentModal.querySelector('.modal-title');
+                const modalBodyInputId = updateStudentModal.querySelector('#update_username');
+                const modalBodyInputSurname = updateStudentModal.querySelector('#update_surname');
+                const modalBodyInputEmail = updateStudentModal.querySelector('#update_email');
+                const modalBodyInputPhoneNumber = updateStudentModal.querySelector('#update_phone_number');
+                const modalBodySelectCourse = updateStudentModal.querySelector('#update_course');
+        
+                modalTitle.textContent = `Update Student - ${username}`;
+                modalBodyInputId.value = username;
+                modalBodyInputSurname.value = surname;
+                modalBodyInputEmail.value = email;
+                modalBodyInputPhoneNumber.value = phone_number;
+        
+                // Set the selected option in the course dropdown
+                const options = modalBodySelectCourse.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value == course_id) {
+                        options[i].selected = true;
+                        break;
+                    }
+                }
+        
+                const form = document.getElementById('updateStudentForm');
+                form.action = `/update_student/${id}/`;
+            });
+
+            // Delete Confirmation Modal
+    const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+    deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const url = button.getAttribute('data-url');
+
+        const confirmDeleteBtn = deleteConfirmationModal.querySelector('#confirmDeleteBtn');
+        confirmDeleteBtn.setAttribute('href', url);
+    });
+        </script>
+        
+</body>
+</html>
